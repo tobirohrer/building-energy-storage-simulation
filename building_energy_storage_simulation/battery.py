@@ -1,17 +1,16 @@
 class Battery:
     """
     Battery class.
+
+    :param capacity:
+    :type capacity: float
+    :returns: Nothing
+    :rtype: None
     """
 
     def __init__(self, capacity: float = 100, initial_state_of_charge: float = 0):
-        """
-        Constructor initializing parameter_a with the given value.
-        :param capacity:
-        :type capacity: float
-        :returns: Nothing
-        :rtype: None
-        """
         self.capacity = capacity
+        self.initial_state_of_charge = initial_state_of_charge
         self.state_of_charge = initial_state_of_charge
         pass
 
@@ -29,3 +28,6 @@ class Battery:
             electricity_used = amount
             self.state_of_charge += amount
         return electricity_used
+
+    def reset(self):
+        self.state_of_charge = self.initial_state_of_charge

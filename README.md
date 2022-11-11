@@ -20,10 +20,10 @@ The inspiration of this project and the data profiles come from the [CityLearn](
 ## Usage 
 
 ```
-from building_energy_storage_simulation import Simulation
-simulation = Simulation()
-simulation.reset()
-simulation.step(42)
+from building_energy_storage_simulation import Environment
+env = Environment()
+env.reset()
+env.step(42)
 ...
 ```
 

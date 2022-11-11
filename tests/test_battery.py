@@ -1,4 +1,3 @@
-import pytest
 from building_energy_storage_simulation import Battery
 
 
