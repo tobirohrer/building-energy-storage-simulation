@@ -14,7 +14,18 @@ class Battery:
         self.state_of_charge = initial_state_of_charge
         pass
 
-    def use(self, amount):
+    def use(self, action):
+        """
+        Using means charging or discharging the battery.
+
+        :param action: The action space is in [-1;1]. 1 means fully charging the battery during a time step. -1 means
+        fully discharging the battery. 0 means do nothing.
+        :type action: float
+        :returns: Amount of energy consumed to charge or amount of energy gained by discharging the battery in kWh.
+        :rtype: float
+        """
+        # Action Space is in [-1;1].
+        amount = action * self.capacity
         # In case battery would be "more than" fully discharged. This applies only if amount is negative
         if self.state_of_charge + amount < 0:
             electricity_used = self.state_of_charge

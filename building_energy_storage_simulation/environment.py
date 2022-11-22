@@ -11,19 +11,24 @@ class Environment(gym.Env):
 
     :param simulation: Simulation to be used for the environment.
     :type simulation: Simulation
+    :param max_timesteps: The number of steps after which the environment terminates
+    :type max_timesteps: int
+    :param num_forecasting_steps: The number of timesteps into the future included in the forecast. Note that the
+    forecast is perfect.
     """
 
-    NUM_FORECAST_STEPS = 4
-    MAX_TIMESTEPS = 2000
-
     def __init__(self,
-                 simulation: Simulation = Simulation()):
+                 simulation: Simulation = Simulation(),
+                 max_timesteps: int = 2000,
+                 num_forecasting_steps: int = 4):
+        self.max_timesteps = max_timesteps
+        self.num_forecasting_steps = num_forecasting_steps
         self.simulation = simulation
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float32)
         # Using np.inf as bounds as the observations must be rescaled externally anyways. E.g. Using the VecNormalize
         # wrapper from StableBaselines3
         # (see https://stable-baselines.readthedocs.io/en/master/guide/vec_envs.html#vecnormalize)
-        self.observation_space = gym.spaces.Box(shape=(Environment.NUM_FORECAST_STEPS*2,),
+        self.observation_space = gym.spaces.Box(shape=(self.num_forecasting_steps * 2,),
                                                 low=-np.inf,
                                                 high=np.inf,
                                                 dtype=np.float64)
@@ -48,17 +53,20 @@ class Environment(gym.Env):
         return observation, reward, self.get_terminated(), False, {}
 
     def get_terminated(self):
-        if self.simulation.step_count > self.MAX_TIMESTEPS:
+        if self.simulation.step_count > self.max_timesteps:
             return True
         return False
 
     def get_observation(self):
         current_index = self.simulation.start_index + self.simulation.step_count
         electric_load_forecast = self.simulation.electricity_load_profile[current_index: current_index +
-                                                                                         self.NUM_FORECAST_STEPS]
+                                                                                         self.num_forecasting_steps]
         solar_gen_forecast = self.simulation.solar_generation_profile[current_index: current_index +
-                                                                                     self.NUM_FORECAST_STEPS]
-        return np.concatenate((electric_load_forecast, solar_gen_forecast), axis=0)
+                                                                                     self.num_forecasting_steps]
+        return np.concatenate(([self.simulation.building.battery.state_of_charge],
+                               electric_load_forecast,
+                               solar_gen_forecast),
+                              axis=0)
 
     @staticmethod
     def calc_reward(electricity_consumption):

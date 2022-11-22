@@ -13,8 +13,7 @@ def test_environment_noop_step():
 
 
 def test_terminated_at_timelimit_reached():
-    env = Environment()
-    env.MAX_TIMESTEPS = 10
+    env = Environment(max_timesteps=10)
     for i in range(10):
         obs, reward, terminated, trunc, info = env.step(0)
     assert terminated is True

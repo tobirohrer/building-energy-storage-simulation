@@ -39,9 +39,8 @@ class Simulation:
             3. Trimming the amount of energy to 0, in case it is negative.
             4. Increasing the step counter.
 
-        :param action: Amount of energy to charge or discharge the battery in kWh. Negative values are discharging,
-        meaning "gaining" electricity from the battery. Positive values are charging the battery
-        :type action: float
+        :param action: Lie in [-1;1]. Represent the portion of the battery is to be charged or discharged. 1 means
+        fully charging the battery during a time step. -1 means fully discharging the battery. 0 means do nothing.
         :returns: Amount of energy consumed in this time step. This is calculated by: `battery_energy`
         + `electricity_load` - `solar_generation`. Note that negative values are trimmed to 0. This means, that energy
         can not be "gained". Excess energy from the solar energy system which is not used
