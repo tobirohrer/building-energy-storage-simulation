@@ -88,7 +88,7 @@ The episode ends if the `max_timesteps` of the `Environment()` are reached.
 ### Parameters 
 
 | Name | Description | Default Value | Set by |
-| ----------- | ----------- | ----------- | ----------- | ----------- |
+| ----------- | ----------- | ----------- | ----------- |
 | Battery Capacity |  The capacity of the battery (in kWh)| 100 | `Environment().simulation.building.battery.capacity = X` |
 | Episode Length |  The length of one episode | 2000 | `Environment(max_timesteps)` |
 | Forecast Length|  The length of the electric load and solar generation forecast |4| `Environment(num_forecasting_steps)` |
