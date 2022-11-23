@@ -70,4 +70,4 @@ class Environment(gym.Env):
 
     @staticmethod
     def calc_reward(electricity_consumption):
-        return electricity_consumption
+        return -1 * electricity_consumption
