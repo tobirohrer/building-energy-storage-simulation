@@ -8,18 +8,22 @@ The inspiration of this project and the data profiles come from the [CityLearn](
 
 ## Installation
 
-1. clone it to your local filesystem: `git clone https://github.com/tobirohrer/building-energy-storage-simulation.git`		
-2. cd into the cloned repository: `cd python-project-template`
-3. optional:
-
-	4. create new python environment: `conda create -n <env_name> python=3.X`
-	5. activate new python environment: `conda activate <env_name>`
-6. install the package by: `pip install .` (If you want to run tests, build the sphinx documentation locally, or want to continue developing, install it via `pip install -e .[docs,tests]`)
-7. done :)
-
-## Usage 
+By using pip just: 
 
 ```
+pip install building-energy-storage-simulation
+```
+
+or if you want to continue developing the package:
+
+```
+git clone https://github.com/tobirohrer/building-energy-storage-simulation.git && cd building-energy-storage-simulation
+pip install -e .[docs,tests]
+```
+
+## Usage
+
+```python
 from building_energy_storage_simulation import Environment
 env = Environment()
 env.reset()
@@ -29,7 +33,7 @@ env.step(42)
 
 You can change the capacity of the battery by
 
-```
+```python
 env = Environment()
 env.simulation.building.battery.capacity = 50
 ```
