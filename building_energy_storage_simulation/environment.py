@@ -28,7 +28,7 @@ class Environment(gym.Env):
         # Using np.inf as bounds as the observations must be rescaled externally anyways. E.g. Using the VecNormalize
         # wrapper from StableBaselines3
         # (see https://stable-baselines.readthedocs.io/en/master/guide/vec_envs.html#vecnormalize)
-        self.observation_space = gym.spaces.Box(shape=(self.num_forecasting_steps * 2,),
+        self.observation_space = gym.spaces.Box(shape=(self.num_forecasting_steps * 2 + 1,),
                                                 low=-np.inf,
                                                 high=np.inf,
                                                 dtype=np.float64)
@@ -47,6 +47,8 @@ class Environment(gym.Env):
         return self.get_observation(), {}
 
     def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
+        if hasattr(action, "__len__"):
+            action = action[0]
         electricity_consumption = self.simulation.simulate_one_step(action)
         reward = Environment.calc_reward(electricity_consumption)
         observation = self.get_observation()
