@@ -9,7 +9,7 @@ def test_environment_noop_step():
     env = Environment()
     initial_obs = env.reset()
     obs = env.step(0)
-    assert initial_obs[0][1] == obs[0][0]
+    assert initial_obs[0][2] == obs[0][1]
 
 
 def test_terminated_at_timelimit_reached():
