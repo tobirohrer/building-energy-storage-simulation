@@ -10,14 +10,19 @@ class Simulation:
     :type electricity_load_profile_file_name: str
     :param solar_generation_profile_file_name: Path to csv file containing solar energy generation profile.
     :type solar_generation_profile_file_name: str
-    :param building: Instance of Building to be used for the simulation.
-    :type building: Building
     """
+
     def __init__(self,
                  electricity_load_profile_file_name: str = 'electricity_load_profile.csv',
                  solar_generation_profile_file_name: str = 'solar_generation_profile.csv',
-                 building: Building = Building()):
-        self.building = building
+                 battery_capacity: float = 100,
+                 solar_power_installed: float = 240,
+                 max_battery_charge_per_timestep: float = 20
+                 ):
+        self.building = Building(solar_power_installed=solar_power_installed,
+                                 battery_capacity=battery_capacity,
+                                 max_battery_charge_per_timestep=max_battery_charge_per_timestep)
+
         self.electricity_load_profile = load_profile(electricity_load_profile_file_name, 'Load [kWh]')
         self.solar_generation_profile = load_profile(solar_generation_profile_file_name, 'Inverter Power (W)')
         # Solar Generation Profile is in W per 1KW of Solar power installed
@@ -31,7 +36,7 @@ class Simulation:
         self.step_count = 0
         pass
 
-    def simulate_one_step(self, action: float) -> float:
+    def simulate_one_step(self, amount: float) -> float:
         """
         Performs one simulation step by:
             1. Charging or discharging the battery depending on the action.
@@ -39,8 +44,7 @@ class Simulation:
             3. Trimming the amount of energy to 0, in case it is negative.
             4. Increasing the step counter.
 
-        :param action: Lie in [-1;1]. Represent the portion of the battery is to be charged or discharged. 1 means
-        fully charging the battery during a time step. -1 means fully discharging the battery. 0 means do nothing.
+        :param amount: Amount of energy to be stored or retrieved from the battery. In kWh.
         :returns: Amount of energy consumed in this time step. This is calculated by: `battery_energy`
         + `electricity_load` - `solar_generation`. Note that negative values are trimmed to 0. This means, that energy
         can not be "gained". Excess energy from the solar energy system which is not used
@@ -50,10 +54,12 @@ class Simulation:
         electricity_load_of_this_timestep = self.electricity_load_profile[self.start_index + self.step_count]
         solar_generation_of_this_timestep = self.solar_generation_profile[self.start_index + self.step_count]
 
-        electricity_consumed_for_battery = self.building.battery.use(action)
+        electricity_consumed_for_battery = self.building.battery.use(amount)
         electricity_consumption = electricity_consumed_for_battery + electricity_load_of_this_timestep - \
                                   solar_generation_of_this_timestep
+        excess_energy = 0
         if electricity_consumption < 0:
+            excess_energy = -1 * electricity_consumption
             electricity_consumption = 0
         self.step_count += 1
-        return electricity_consumption
+        return electricity_consumption, excess_energy
