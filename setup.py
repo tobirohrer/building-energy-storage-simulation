@@ -31,6 +31,10 @@ setup(name='building_energy_storage_simulation',
           ],
           "tests": [
               "pytest"
+          ],
+          "demo": [
+              # see https://github.com/DLR-RM/stable-baselines3/pull/780#issuecomment-1164774401
+              "stable-baselines3 @ git+https://github.com/carlosluis/stable-baselines3@fix_tests"
           ]
       }
       )
