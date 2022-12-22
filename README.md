@@ -6,6 +6,10 @@ The Building Energy Storage Simulation serves as open Source OpenAI gym (now [gy
 
 The inspiration of this project and the data profiles come from the [CityLearn](https://github.com/intelligent-environments-lab/CityLearn) environment. Anyhow, this project focuses on the ease of usage and the simplicity of its implementation.
 
+## Documentation
+
+The documentation is available at [https://building-energy-storage-simulation.readthedocs.io/](https://building-energy-storage-simulation.readthedocs.io/)
+
 ## Installation
 
 By using pip just: 
@@ -31,13 +35,6 @@ env.step(42)
 ...
 ```
 
-You can change the capacity of the battery by
-
-```python
-env = Environment()
-env.simulation.building.battery.capacity = 50
-```
-
 **Important note:** This environment is implemented by using [gymnasium](https://github.com/Farama-Foundation/Gymnasium) (the proceeder of OpenAI gym). Meaning, if you are using a reinforcement learning library like [Stable Baselines3](https://github.com/DLR-RM/stable-baselines3) make sure it supports [gymnasium](https://github.com/Farama-Foundation/Gymnasium) environments. 
 
 ## Task Description
@@ -56,10 +53,10 @@ The simulated building has a battery which can be used to store energy. You can 
 | ----------- | ----------- | ----------- |
 | Charge | -1      | 1       |
 
-The actions lie in the interval of [-1;1]. The action represents the portion of the battery is to be charged or discharged:
+The actions lie in the interval of [-1;1]. The action represents a fraction of the maximum energy which can be retrieved from the battery (or used to charge the battery) per time step.
 
-- 1 means fully charging the battery during the upcoming time step 
-- -1 means fully discharging the battery, meaning "gaining" electricity out of the battery
+- 1 means maximum charging the battery. The maximum charge per time step is defined by the parameter `max_battery_charge_per_timestep`.
+- -1 means maximum discharging the battery, meaning "gaining" electricity out of the battery
 - 0 means don't charge or discharge
 
 ### Observation Space
@@ -87,12 +84,3 @@ It is important to note, that the term `electricity_consumed` cannot be negative
 ### Episode Ends
 
 The episode ends if the `max_timesteps` of the `Environment()` are reached.
-
-
-### Parameters 
-
-| Name | Description | Default Value | Set by |
-| ----------- | ----------- | ----------- | ----------- |
-| Battery Capacity |  The capacity of the battery (in kWh)| 100 | `Environment().simulation.building.battery.capacity = X` |
-| Episode Length |  The length of one episode | 2000 | `Environment(max_timesteps)` |
-| Forecast Length|  The length of the electric load and solar generation forecast |4| `Environment(num_forecasting_steps)` |
