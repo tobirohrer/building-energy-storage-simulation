@@ -4,6 +4,14 @@ from building_energy_storage_simulation.battery import Battery
 class Building:
     """
     Building class.
+
+    :param solar_power_installed: The installed peak photovoltaic power in kWp.
+    :type solar_power_installed: float
+    :param battery_capacity: The capacity of the battery in kWh.
+    :type battery_capacity: float
+    :param max_battery_charge_per_timestep: Maximum amount of energy (kWh) which can be obtained from the battery or
+        which can be used to charge the battery in one time step.
+    :type max_battery_charge_per_timestep: float
     """
 
     def __init__(self,
@@ -16,4 +24,7 @@ class Building:
         pass
 
     def reset(self):
+        """
+        Resetting the state of the battery by calling `reset()` method from the battery class.
+        """
         self.battery.reset()

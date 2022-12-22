@@ -1,11 +1,14 @@
 class Battery:
     """
-    Battery class.
+    The Battery class.
 
-    :param capacity:
+    :param capacity: The capacity of the battery in kWh.
     :type capacity: float
-    :returns: Nothing
-    :rtype: None
+    :param initial_state_of_charge: The initial charging state of the battery in kWh.
+    :type initial_state_of_charge: float
+    :param max_battery_charge_per_timestep: Maximum amount of energy (kWh) which can be obtained from the battery or
+        which can be used to charge the battery in one time step.
+    :type max_battery_charge_per_timestep: float
     """
 
     def __init__(self,
@@ -19,11 +22,12 @@ class Battery:
         self.state_of_charge = initial_state_of_charge
         pass
 
-    def use(self, amount):
+    def use(self, amount: float):
         """
         Using means charging or discharging the battery.
 
-        :param amount: Amount of energy to be stored or retrieved from the battery. In kWh.
+        :param amount: Amount of energy to be stored or retrieved from the battery in kWh. Note that the amount
+            is set to the value of `max_battery_charge_per_timestep` if it exceeds it.
         :type amount: float
         :returns: Amount of energy consumed to charge or amount of energy gained by discharging the battery in kWh.
         :rtype: float
@@ -49,4 +53,7 @@ class Battery:
         return electricity_used
 
     def reset(self):
+        """
+        Resetting the `state_of_charge` of the battery to the `initial_state_of_charge`.
+        """
         self.state_of_charge = self.initial_state_of_charge

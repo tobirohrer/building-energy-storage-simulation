@@ -8,8 +8,17 @@ class Simulation:
 
     :param electricity_load_profile_file_name: Path to csv file containing electric load profile.
     :type electricity_load_profile_file_name: str
-    :param solar_generation_profile_file_name: Path to csv file containing solar energy generation profile.
+    :param solar_generation_profile_file_name: Path to csv file containing solar energy generation profile. Note that
+        the profile is in W per kWp of solar power installed. The actual solar generetion is determined by
+        multiplication with the `solar_power_installed`
     :type solar_generation_profile_file_name: str
+    :param solar_power_installed: The installed peak photovoltaic power in kWp.
+    :type solar_power_installed: float
+    :param battery_capacity: The capacity of the battery in kWh.
+    :type battery_capacity: float
+    :param max_battery_charge_per_timestep: Maximum amount of energy (kWh) which can be obtained from the battery or
+        which can be used to charge the battery in one time step.
+    :type max_battery_charge_per_timestep: float
     """
 
     def __init__(self,
@@ -32,6 +41,14 @@ class Simulation:
         pass
 
     def reset(self):
+        """
+
+        1. Resetting the state of the building by calling `reset()` method from the building class.
+        2. Resetting the `step_count` to 0. The `step_count` is used for temporal orientation in the electricity
+           load and solar generation profile.
+
+        """
+
         self.building.reset()
         self.step_count = 0
         pass
@@ -39,17 +56,23 @@ class Simulation:
     def simulate_one_step(self, amount: float) -> float:
         """
         Performs one simulation step by:
-            1. Charging or discharging the battery depending on the action.
-            2. Calculating the amount of energy consumed in this time step.
+            1. Charging or discharging the battery depending on the amount.
+            2. Calculating the amount of energy consumed by the building in this time step.
             3. Trimming the amount of energy to 0, in case it is negative.
-            4. Increasing the step counter.
+            4. Calculating the amount of excess energy which is considered lost.
+            5. Increasing the step counter.
 
         :param amount: Amount of energy to be stored or retrieved from the battery. In kWh.
-        :returns: Amount of energy consumed in this time step. This is calculated by: `battery_energy`
-        + `electricity_load` - `solar_generation`. Note that negative values are trimmed to 0. This means, that energy
-        can not be "gained". Excess energy from the solar energy system which is not used
-        to charge the battery is considered lost. Better use it to charge the battery ;-)
-        :rtype: float
+        :type amount: float
+        :returns:
+            Tuple of:
+                1. Amount of energy consumed in this time step. This is calculated by: `battery_energy`
+                   + `electricity_load` - `solar_generation`. Note that negative values are trimmed to 0. This means, that energy
+                   can not be "gained". Excess energy from the solar energy system which is not used
+                   to charge the battery is considered lost. Better use it to charge the battery ;-)
+                2. Amount of excess energy which is considered lost.
+
+        :rtype: (float, float)
         """
         electricity_load_of_this_timestep = self.electricity_load_profile[self.start_index + self.step_count]
         solar_generation_of_this_timestep = self.solar_generation_profile[self.start_index + self.step_count]
