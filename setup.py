@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='building_energy_storage_simulation',
-      version='0.4',
+      version='0.4.1',
       description='A simulation of a building to optimize energy storage utilization.',
       author='Tobias Rohrer',
       author_email='tobias.rohrer@outlook.com',
