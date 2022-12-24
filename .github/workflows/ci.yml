@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: install dependencies
+      run: pip install .[tests]
+
+    - name: Run Tests with pytest
+      run: make test
