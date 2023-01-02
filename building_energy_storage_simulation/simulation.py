@@ -34,6 +34,8 @@ class Simulation:
 
         self.electricity_load_profile = load_profile(electricity_load_profile_file_name, 'Load [kWh]')
         self.solar_generation_profile = load_profile(solar_generation_profile_file_name, 'Inverter Power (W)')
+        assert len(self.solar_generation_profile) == len(self.electricity_load_profile), \
+            "Solar generation profile and electricity load profile must be of the same length."
         # Solar Generation Profile is in W per 1KW of Solar power installed
         self.solar_generation_profile = self.solar_generation_profile * self.building.solar_power_installed / 1000
         self.step_count = 0

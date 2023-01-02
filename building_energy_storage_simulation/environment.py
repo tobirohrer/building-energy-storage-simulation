@@ -28,7 +28,7 @@ class Environment(gym.Env):
                  num_forecasting_steps: int = 4,
                  battery_capacity: float = 100,
                  solar_power_installed: float = 240,  # Solar Gen Profile is in W per 1KW of Solar power installed
-                 max_battery_charge_per_timestep: float = 20,  # Action of 0.1 equals 10 kWh to charge.
+                 max_battery_charge_per_timestep: float = 20,
                  ):
 
         self.simulation = Simulation(battery_capacity=battery_capacity,
@@ -37,6 +37,8 @@ class Environment(gym.Env):
 
         self.max_battery_charge_per_timestep = max_battery_charge_per_timestep
         self.max_timesteps = max_timesteps
+        assert self.max_timesteps + num_forecasting_steps < len(self.simulation.solar_generation_profile), \
+            "`max_timesteps plus the forecast length cannot be greater than the length of the simulation profile."
         self.num_forecasting_steps = num_forecasting_steps
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float32)
         # Using np.inf as bounds as the observations must be rescaled externally anyways. E.g. Using the VecNormalize
