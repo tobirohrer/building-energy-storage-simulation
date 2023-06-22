@@ -47,7 +47,7 @@ class Environment(gym.Env):
         self.observation_space = gym.spaces.Box(shape=(self.num_forecasting_steps * 2 + 1,),
                                                 low=-np.inf,
                                                 high=np.inf,
-                                                dtype=np.float64)
+                                                dtype=np.float32)
         pass
 
     def render(self) -> Optional[Union[RenderFrame, List[RenderFrame]]]:
