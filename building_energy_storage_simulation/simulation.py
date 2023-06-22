@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from building_energy_storage_simulation.building import Building
 from building_energy_storage_simulation.utils import load_profile
 
@@ -55,7 +57,7 @@ class Simulation:
         self.step_count = 0
         pass
 
-    def simulate_one_step(self, amount: float) -> float:
+    def simulate_one_step(self, amount: float) -> Tuple[float, float]:
         """
         Performs one simulation step by:
             1. Charging or discharging the battery depending on the amount.
