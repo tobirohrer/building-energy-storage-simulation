@@ -57,7 +57,7 @@ class Environment(gym.Env):
 
         pass
 
-    def reset(self) -> Tuple[ObsType, dict]:
+    def reset(self, seed=None, options=None) -> Tuple[ObsType, dict]:
         """
         Resetting the state of the simulation by calling `reset()` method from the simulation class.
 
