@@ -4,7 +4,7 @@ this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setup(name='building_energy_storage_simulation',
-      version='0.6.0',
+      version='0.7.0',
       description='A simulation of a building to optimize energy storage utilization.',
       long_description=long_description,
       long_description_content_type='text/markdown',
