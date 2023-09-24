@@ -1,5 +1,6 @@
 from typing import Tuple
 
+from building_energy_storage_simulation.battery import Battery
 from building_energy_storage_simulation.building import Building
 from building_energy_storage_simulation.utils import load_profile
 
@@ -30,9 +31,11 @@ class Simulation:
                  solar_power_installed: float = 240,
                  max_battery_charge_per_timestep: float = 20
                  ):
+        battery = Battery(capacity=battery_capacity,
+                          max_battery_charge_per_timestep=max_battery_charge_per_timestep)
+
         self.building = Building(solar_power_installed=solar_power_installed,
-                                 battery_capacity=battery_capacity,
-                                 max_battery_charge_per_timestep=max_battery_charge_per_timestep)
+                                 battery=battery)
 
         self.electricity_load_profile = load_profile(electricity_load_profile_file_name, 'Load [kWh]')
         self.solar_generation_profile = load_profile(solar_generation_profile_file_name, 'Inverter Power (W)')

@@ -1,8 +1,8 @@
-from building_energy_storage_simulation import Simulation
+from building_energy_storage_simulation import BuildingSimulation
 
 
 def test_energy_consumption_is_trimmed_to_0():
-    sim = Simulation()
+    sim = BuildingSimulation()
     # Setting load of next time step to 0kWh
     sim.electricity_load_profile = [0]
     # Setting solar generation of next time step to 100kWh
