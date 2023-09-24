@@ -31,8 +31,11 @@ To use the building-energy-storage-simulation, first install it using pip:
 
 .. code-block:: python
 
-    from building_energy_storage_simulation import Environment
-    env = Environment()
-    initial_observation, _ = env.reset()
-    observation, reward, done, truncated, info = env.step(42)
+    from building_energy_storage_simulation import Environment, BuildingSimulation
+
+    simulation = BuildingSimulation()
+    env = Environment(building_simulation=simulation)
+
+    env.reset()
+    env.step(1)
     ...

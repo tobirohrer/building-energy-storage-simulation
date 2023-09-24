@@ -30,7 +30,6 @@ Contents
 
    modules/environment
    modules/simulation
-   modules/building
    modules/battery
 
 Thanks To

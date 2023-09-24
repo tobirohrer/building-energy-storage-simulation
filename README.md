@@ -37,10 +37,13 @@ questions, contact me via
 ## Usage
 
 ```python
-from building_energy_storage_simulation import Environment
-env = Environment()
+from building_energy_storage_simulation import Environment, BuildingSimulation
+
+simulation = BuildingSimulation()
+env = Environment(building_simulation=simulation)
+
 env.reset()
-env.step(42)
+env.step(1)
 ...
 ```
 
