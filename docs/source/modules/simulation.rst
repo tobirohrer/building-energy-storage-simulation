@@ -1,7 +1,7 @@
 .. _simulation:
 
-Simulation
-==========
+BuildingSimulation
+==================
 
-.. autoclass:: building_energy_storage_simulation.Simulation
+.. autoclass:: building_energy_storage_simulation.BuildingSimulation
   :members:

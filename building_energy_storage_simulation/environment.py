@@ -2,7 +2,7 @@ from typing import Tuple, Optional, Union, List
 import gymnasium as gym
 import numpy as np
 from gymnasium.core import ActType, ObsType, RenderFrame
-from building_energy_storage_simulation.simulation import Simulation
+from building_energy_storage_simulation.building_simulation import BuildingSimulation
 
 
 class Environment(gym.Env):
@@ -14,32 +14,23 @@ class Environment(gym.Env):
     :param num_forecasting_steps: The number of timesteps into the future included in the forecast. Note that the
        forecast is perfect.
     :type num_forecasting_steps: int
-    :param solar_power_installed: The installed peak photovoltaic power in kWp.
-    :type solar_power_installed: float
-    :param battery_capacity: The capacity of the battery in kWh.
-    :type battery_capacity: float
-    :param max_battery_charge_per_timestep: Maximum amount of energy (kWh) which can be obtained from the battery or
-       which can be used to charge the battery in one time step.
-    :type max_battery_charge_per_timestep: float
+    :param building_simulation: Instance of `BuildingSimulation` to be wrapped as `gymnasium` environment.
+    :type building_simulation: BuildingSimulation
     """
 
     def __init__(self,
+                 building_simulation: BuildingSimulation,
                  max_timesteps: int = 2000,
                  num_forecasting_steps: int = 4,
-                 battery_capacity: float = 100,
-                 solar_power_installed: float = 240,  # Solar Gen Profile is in W per 1KW of Solar power installed
-                 max_battery_charge_per_timestep: float = 20,
                  ):
 
-        self.simulation = Simulation(battery_capacity=battery_capacity,
-                                     solar_power_installed=solar_power_installed,
-                                     max_battery_charge_per_timestep=max_battery_charge_per_timestep)
-
-        self.max_battery_charge_per_timestep = max_battery_charge_per_timestep
+        self.building_simulation = building_simulation
         self.max_timesteps = max_timesteps
-        assert self.max_timesteps + num_forecasting_steps < len(self.simulation.solar_generation_profile), \
-            "`max_timesteps plus the forecast length cannot be greater than the length of the simulation profile."
         self.num_forecasting_steps = num_forecasting_steps
+
+        assert self.max_timesteps + self.num_forecasting_steps < len(self.building_simulation.solar_generation_profile), \
+            "`max_timesteps` plus the forecast length cannot be greater than the length of the simulation profile."
+
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float32)
         # Using np.inf as bounds as the observations must be rescaled externally anyways. E.g. Using the VecNormalize
         # wrapper from StableBaselines3
@@ -69,7 +60,7 @@ class Environment(gym.Env):
         :rtype: (observation, dict)
         """
 
-        self.simulation.reset()
+        self.building_simulation.reset()
         return self.get_observation(), {}
 
     def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
@@ -99,25 +90,24 @@ class Environment(gym.Env):
 
         if hasattr(action, "__len__"):
             action = action[0]
-        electricity_consumption, excess_energy = self.simulation.simulate_one_step(action *
-                                                                                   self.max_battery_charge_per_timestep)
+        electricity_consumption, excess_energy = self.building_simulation.simulate_one_step(action)
         reward = Environment.calc_reward(electricity_consumption, excess_energy)
         observation = self.get_observation()
         return observation, reward, self.get_terminated(), False, {'electricity_consumption': electricity_consumption,
                                                                    'excess_energy': excess_energy}
 
     def get_terminated(self):
-        if self.simulation.step_count > self.max_timesteps:
+        if self.building_simulation.step_count > self.max_timesteps:
             return True
         return False
 
     def get_observation(self):
-        current_index = self.simulation.start_index + self.simulation.step_count
-        electric_load_forecast = self.simulation.electricity_load_profile[current_index: current_index +
-                                                                                         self.num_forecasting_steps]
-        solar_gen_forecast = self.simulation.solar_generation_profile[current_index: current_index +
-                                                                                     self.num_forecasting_steps]
-        return np.concatenate(([self.simulation.building.battery.state_of_charge],
+        current_index = self.building_simulation.start_index + self.building_simulation.step_count
+        electric_load_forecast = self.building_simulation.electricity_load_profile[current_index: current_index +
+                                                                                                  self.num_forecasting_steps]
+        solar_gen_forecast = self.building_simulation.solar_generation_profile[current_index: current_index +
+                                                                                              self.num_forecasting_steps]
+        return np.concatenate(([self.building_simulation.battery.state_of_charge],
                                electric_load_forecast,
                                solar_gen_forecast),
                               axis=0)
