@@ -34,7 +34,7 @@ def test_observation_size(building_simulation):
     env = Environment(building_simulation=building_simulation, max_timesteps=5, num_forecasting_steps=4)
     initial_obs, info = env.reset()
     obs, reward, terminated, trunc, info = env.step(0)
-    assert len(obs) == 9
+    assert len(obs) == 13
 
 
 def test_initial_obs_step_obs_same_size(building_simulation):

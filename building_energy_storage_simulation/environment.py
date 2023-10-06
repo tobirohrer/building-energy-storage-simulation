@@ -35,7 +35,7 @@ class Environment(gym.Env):
         # Using np.inf as bounds as the observations must be rescaled externally anyways. E.g. Using the VecNormalize
         # wrapper from StableBaselines3
         # (see https://stable-baselines.readthedocs.io/en/master/guide/vec_envs.html#vecnormalize)
-        self.observation_space = gym.spaces.Box(shape=(self.num_forecasting_steps * 2 + 1,),
+        self.observation_space = gym.spaces.Box(shape=(self.num_forecasting_steps * 3 + 1,),
                                                 low=-np.inf,
                                                 high=np.inf,
                                                 dtype=np.float32)
@@ -81,8 +81,8 @@ class Environment(gym.Env):
                 1. observation
                 2. reward
                 3. terminated. If true, the episode is over.
-                4. truncated. Is always false, it is not implemented yet.
-                5. Additional Information about the `electricity_comsumption` and the `excess_energy` of the current
+                4. truncated. Is always false, as it is not implemented yet.
+                5. Additional Information about the `electricity_consumption` and the `electricity_price` of the current
                    time step
 
         :rtype: (observation, float, bool, bool, dict)
@@ -90,28 +90,30 @@ class Environment(gym.Env):
 
         if hasattr(action, "__len__"):
             action = action[0]
-        electricity_consumption, excess_energy = self.building_simulation.simulate_one_step(action)
-        reward = Environment.calc_reward(electricity_consumption, excess_energy)
+        electricity_consumption, electricity_price = self.building_simulation.simulate_one_step(action)
+        reward = Environment.calc_reward(electricity_consumption, electricity_price)
         observation = self.get_observation()
-        return observation, reward, self.get_terminated(), False, {'electricity_consumption': electricity_consumption,
-                                                                   'excess_energy': excess_energy}
+        return observation, reward, self._get_terminated(), False, {'electricity_consumption': electricity_consumption,
+                                                                    'electricity_price': electricity_price}
 
-    def get_terminated(self):
+    def _get_terminated(self):
         if self.building_simulation.step_count > self.max_timesteps:
             return True
         return False
 
     def get_observation(self):
         current_index = self.building_simulation.start_index + self.building_simulation.step_count
-        electric_load_forecast = self.building_simulation.electricity_load_profile[current_index: current_index +
-                                                                                                  self.num_forecasting_steps]
-        solar_gen_forecast = self.building_simulation.solar_generation_profile[current_index: current_index +
-                                                                                              self.num_forecasting_steps]
+        sim = self.building_simulation
+        electric_load_forecast = sim.electricity_load_profile[current_index: current_index + self.num_forecasting_steps]
+        solar_gen_forecast = sim.solar_generation_profile[current_index: current_index + self.num_forecasting_steps]
+        energy_price_forecast = sim.electricity_price[current_index: current_index + self.num_forecasting_steps]
+
         return np.concatenate(([self.building_simulation.battery.state_of_charge],
                                electric_load_forecast,
-                               solar_gen_forecast),
+                               solar_gen_forecast,
+                               energy_price_forecast),
                               axis=0)
 
     @staticmethod
-    def calc_reward(electricity_consumption, excess_energy):
-        return -1 * electricity_consumption
+    def calc_reward(electricity_consumption, electricity_price):
+        return -1 * electricity_consumption * electricity_price
