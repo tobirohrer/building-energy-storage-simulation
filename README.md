@@ -92,7 +92,7 @@ The actions lie in the interval of [-1;1]. The action represents a fraction of t
 | [2n+1; 3*n] | Electricity Price (in € cent per kWh) | Min of Price Profile      | Max of Price Profile         |
 
 
-The length of the observation depends on the length of the forecast used. By default, the simulation uses a forecast length of 4. 
+The length of the observation depends on the length of the forecast ($n$) used. By default, the simulation uses a forecast length of 4. 
 This means 4 time steps of an electric load forecast, 4 time steps of a solar generation forecast and 4 time steps of the 
 electric price profile are included in the observation. 
 In addition to that, the information about the current state of charge of the battery is contained in the observation.
