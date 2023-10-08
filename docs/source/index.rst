@@ -12,17 +12,11 @@ represents a building with an energy storage (in form of a battery) and a solar 
 the energy storage in such a way that the energy of the solar system can be used optimally.
 
 A more detailed description of the task itself and the description of the markov decision process, containing
-information about the action space, observation space and reward can be found :ref:`here <task>`.
+information about the action space, observation space and reward can be found
+`here <https://github.com/tobirohrer/building-energy-storage-simulation>`_.
 
 Contents
 --------
-
-.. toctree::
-   :maxdepth: 1
-   :Caption: User Guide
-
-   guide/installation
-   guide/mdp_definition
 
 .. toctree::
    :maxdepth: 1
