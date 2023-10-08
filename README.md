@@ -99,7 +99,7 @@ The episode ends if the `max_timesteps` of the `Environment()` are reached.
 
 ## Code Documentation
 
-The documentation is available at [https://building-energy-storage-simulation.readthedocs.io/](https://building-energy-storage-simulation.readthedocs.io/)
+The documentation is available at [https://building-energy-storage-simulation.readthedocs.io/](https://building-energy-storage-simulation.readthedocs.io/en/master/)
 
 ## Contribute & Contact
 
