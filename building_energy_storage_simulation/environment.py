@@ -74,7 +74,7 @@ class Environment(gym.Env):
         :param action: Fraction of energy to be stored or retrieved from the battery. The action lies in [-1;1]. The
             action represents the fraction of `max_battery_charge_per_timestep` which should be used to charge or
             discharge the battery. 1 represents the maximum possible amount of energy which can be used to charge the
-             battery per time step.
+            battery per time step.
         :type action: float
         :returns:
             Tuple of:
