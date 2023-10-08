@@ -8,6 +8,7 @@ import pytest
 def building_simulation():
     return BuildingSimulation(electricity_load_profile=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                               solar_generation_profile=[10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+                              electricity_price=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                               max_battery_charge_per_timestep=20)
 
 
@@ -60,3 +61,11 @@ def test_reset(building_simulation):
     env.reset()
     assert env.building_simulation.step_count == 0
     assert env.building_simulation.battery.state_of_charge == 0
+
+
+def test_default_initialization_runs_without_throwing():
+    sim = BuildingSimulation()
+    env = Environment(sim)
+    env.reset()
+    env.step(1)
+    assert env.building_simulation.step_count == 1
