@@ -36,7 +36,7 @@ class Environment(gym.Env):
         self.data_profile_length = len(self.building_simulation.solar_generation_profile)
 
         assert self.max_timesteps + self.num_forecasting_steps <= self.data_profile_length, \
-            "`max_timesteps` plus the forecast length must be less than the length of the data profiles."
+            "`max_timesteps` plus the forecast length cannot be greater than the length of the data profiles."
 
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float32)
         # Using np.inf as bounds as the observations must be rescaled externally anyways. E.g. Using the VecNormalize
