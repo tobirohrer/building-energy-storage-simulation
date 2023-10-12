@@ -4,3 +4,5 @@ gymnasium
 sphinx
 pytest
 stable-baselines3
+casadi
+matplotlib
