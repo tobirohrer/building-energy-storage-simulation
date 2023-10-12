@@ -2,6 +2,7 @@ from building_energy_storage_simulation.building_simulation import BuildingSimul
 
 from building_energy_storage_simulation import Environment
 import pytest
+import numpy as np
 
 
 @pytest.fixture(scope='module')
@@ -23,10 +24,20 @@ def test_environment_noop_step(building_simulation):
     assert initial_obs[0][2] == obs[0][1]
 
 
-def test_terminated_at_timelimit_reached(building_simulation):
-    env = Environment(building_simulation=building_simulation, num_forecasting_steps=0, max_timesteps=9)
+@pytest.mark.parametrize(
+    "data_profile_length, num_forecasting_steps", [(2, 1), (9, 0)]
+)
+def test_terminated_at_timelimit_reached(data_profile_length, num_forecasting_steps):
+    dummy_profile = np.zeros(data_profile_length)
+    building_sim = BuildingSimulation(electricity_price=dummy_profile,
+                                      solar_generation_profile=dummy_profile,
+                                      electricity_load_profile=dummy_profile)
+    env = Environment(building_simulation=building_sim,
+                      num_forecasting_steps=num_forecasting_steps,
+                      max_timesteps=data_profile_length - num_forecasting_steps)
     env.reset()
-    for i in range(10):
+    print(range(data_profile_length - num_forecasting_steps))
+    for i in range(data_profile_length - num_forecasting_steps):
         obs, reward, terminated, trunc, info = env.step(0)
     assert terminated is True
 
@@ -69,3 +80,24 @@ def test_default_initialization_runs_without_throwing():
     env.reset()
     env.step(1)
     assert env.building_simulation.step_count == 1
+
+
+def test_set_random_first_time_step_always_0_for_data_profile_length_2():
+    dummy_profile = [0, 0]
+    sim = BuildingSimulation(electricity_price=dummy_profile,
+                             electricity_load_profile=dummy_profile,
+                             solar_generation_profile=dummy_profile)
+    env = Environment(sim, randomize_start_time_step=True, max_timesteps=1, num_forecasting_steps=1)
+    env.reset()
+    assert env.building_simulation.start_index == 0
+
+
+def test_set_random_first_time_step():
+    dummy_profile = np.zeros(1000)
+    sim = BuildingSimulation(electricity_price=dummy_profile,
+                             electricity_load_profile=dummy_profile,
+                             solar_generation_profile=dummy_profile)
+    env = Environment(sim, randomize_start_time_step=True, max_timesteps=1, num_forecasting_steps=1)
+    env.reset()
+    # This test is very unlikely to fail ;)
+    assert env.building_simulation.start_index != 0

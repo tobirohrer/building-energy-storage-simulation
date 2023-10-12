@@ -16,20 +16,27 @@ class Environment(gym.Env):
     :type num_forecasting_steps: int
     :param building_simulation: Instance of `BuildingSimulation` to be wrapped as `gymnasium` environment.
     :type building_simulation: BuildingSimulation
+    :param randomize_start_time_step: Randomizes the `start_index` in the `BuildingSimulation`. this should help prevent
+        the agent from overfitting to the data profile during training (otherwise it will always see the same time
+        series from the same start point)
+    :type randomize_start_time_step: bool
     """
 
     def __init__(self,
                  building_simulation: BuildingSimulation,
                  max_timesteps: int = 2000,
                  num_forecasting_steps: int = 4,
+                 randomize_start_time_step: bool = False
                  ):
 
         self.building_simulation = building_simulation
         self.max_timesteps = max_timesteps
         self.num_forecasting_steps = num_forecasting_steps
+        self.randomize_start_time_step = randomize_start_time_step
+        self.data_profile_length = len(self.building_simulation.solar_generation_profile)
 
-        assert self.max_timesteps + self.num_forecasting_steps < len(self.building_simulation.solar_generation_profile), \
-            "`max_timesteps` plus the forecast length cannot be greater than the length of the simulation profile."
+        assert self.max_timesteps + self.num_forecasting_steps <= self.data_profile_length, \
+            "`max_timesteps` plus the forecast length must be less than the length of the data profiles."
 
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float32)
         # Using np.inf as bounds as the observations must be rescaled externally anyways. E.g. Using the VecNormalize
@@ -61,6 +68,9 @@ class Environment(gym.Env):
         """
 
         self.building_simulation.reset()
+        if self.randomize_start_time_step:
+            latest_possible_start_time_step = self.data_profile_length - self.max_timesteps - self.num_forecasting_steps
+            self.building_simulation.start_index = int(np.random.uniform(0, latest_possible_start_time_step))
         return self.get_observation(), {}
 
     def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
@@ -97,7 +107,7 @@ class Environment(gym.Env):
                                                                     'electricity_price': electricity_price}
 
     def _get_terminated(self):
-        if self.building_simulation.step_count > self.max_timesteps:
+        if self.building_simulation.step_count >= self.max_timesteps:
             return True
         return False
 
