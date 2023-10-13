@@ -101,3 +101,31 @@ def test_set_random_first_time_step():
     env.reset()
     # This test is very unlikely to fail ;)
     assert env.building_simulation.start_index != 0
+
+
+@pytest.mark.parametrize(
+    "reset", [True, False]
+)
+def test_forecasts_are_randomized_in_observation(reset):
+    dummy_profile = np.zeros(10)
+    building_sim = BuildingSimulation(electricity_price=dummy_profile,
+                                      solar_generation_profile=dummy_profile,
+                                      electricity_load_profile=dummy_profile)
+    env = Environment(building_simulation=building_sim,
+                      num_forecasting_steps=4,
+                      max_timesteps=6,
+                      randomize_forecasts_in_observation=True)
+
+    if reset:
+        obs, _ = env.reset()
+    else:
+        env.reset()
+        obs, _, _, _, _ = env.step(0)
+
+    load_forecast = np.array(obs[1:5])
+    generation_forecast = obs[5:9]
+    price_forecast = obs[9:14]
+    assert not np.array_equal(generation_forecast, load_forecast)
+    assert not np.array_equal(price_forecast, load_forecast)
+    assert not np.array_equal(price_forecast, dummy_profile)
+
