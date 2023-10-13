@@ -57,6 +57,7 @@ def build_optimization_problem(residual_fixed_load, price, soc=0):
     # d_sohs_calendrical = []
     # d_sohs_cyclical = []
     print(len(residual_fixed_load))
+    large_number = 1e2
     for k in range(len(residual_fixed_load)):
         battery_charge_power_k = casadi.SX.sym("power_" + str(k))  # casadi symbol for control variable
         w += [battery_charge_power_k]
@@ -77,8 +78,8 @@ def build_optimization_problem(residual_fixed_load, price, soc=0):
         ubw += [max_soc]
         w0 += [0.5]
         d_soh_calendrical = 0.2/max_life_time_hours
-        d_soc_charging = np.log(1 + np.exp(d_soc))
-        d_soc_discharging = np.log(1 + np.exp(-d_soc))
+        d_soc_charging = np.log(1 + np.exp(d_soc*large_number))/large_number
+        d_soc_discharging = np.log(1 + np.exp(-d_soc*large_number))/large_number
         d_soh_cyclical_charging = 0.2 * (d_soc_charging/2)/max_cycles
         d_soh_cyclical_discharging = 0.2 * (d_soc_discharging/2)/max_cycles
         d_soh = d_soh_calendrical + d_soh_cyclical_charging + d_soh_cyclical_discharging
