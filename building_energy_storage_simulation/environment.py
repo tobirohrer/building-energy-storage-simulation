@@ -1,4 +1,6 @@
 from typing import Tuple, Optional, Union, List
+from collections.abc import MutableSequence
+
 import gymnasium as gym
 import numpy as np
 from gymnasium.core import ActType, ObsType, RenderFrame
@@ -26,13 +28,15 @@ class Environment(gym.Env):
                  building_simulation: BuildingSimulation,
                  max_timesteps: int = 2000,
                  num_forecasting_steps: int = 4,
-                 randomize_start_time_step: bool = False
+                 randomize_start_time_step: bool = False,
+                 randomize_forecasts_in_observation: bool = False,
                  ):
 
         self.building_simulation = building_simulation
         self.max_timesteps = max_timesteps
         self.num_forecasting_steps = num_forecasting_steps
         self.randomize_start_time_step = randomize_start_time_step
+        self.randomize_forecasts_in_observation = randomize_forecasts_in_observation
         self.data_profile_length = len(self.building_simulation.solar_generation_profile)
 
         assert self.max_timesteps + self.num_forecasting_steps <= self.data_profile_length, \
@@ -118,11 +122,27 @@ class Environment(gym.Env):
         solar_gen_forecast = sim.solar_generation_profile[current_index: current_index + self.num_forecasting_steps]
         energy_price_forecast = sim.electricity_price[current_index: current_index + self.num_forecasting_steps]
 
+        if self.randomize_forecasts_in_observation:
+            electric_load_forecast = self._randomize_forecast(electric_load_forecast)
+            solar_gen_forecast = self._randomize_forecast(solar_gen_forecast)
+            energy_price_forecast = self._randomize_forecast(energy_price_forecast)
+
         return np.concatenate(([self.building_simulation.battery.state_of_charge],
                                electric_load_forecast,
                                solar_gen_forecast,
                                energy_price_forecast),
                               axis=0)
+
+    @staticmethod
+    def _randomize_forecast(forecast: MutableSequence,
+                            standard_deviation_start: float = 0.2,
+                            standard_deviation_end: float = 1.0) -> MutableSequence:
+        # gamma can be interpreted as the quantification of the increase of uncertainty per time step.
+        gamma = standard_deviation_end - standard_deviation_start
+        for i in range(len(forecast)):
+            std = standard_deviation_end - gamma ** i
+            forecast[i] = forecast[i] + np.random.normal(0, std)
+        return forecast
 
     @staticmethod
     def calc_reward(electricity_consumption, electricity_price):
