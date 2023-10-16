@@ -63,18 +63,27 @@ def build_optimization_problem(residual_fixed_load, price, soc=0):
     lbw += [1.0]
     ubw += [1.0]
     w0 += [1.0]
-    large_number = 1e2
     print(len(residual_fixed_load))
     for k in range(len(residual_fixed_load)):
-        battery_a_charge_power_k = casadi.SX.sym("power_a_" + str(k))  # casadi symbol for control variable
-        w += [battery_a_charge_power_k]
-        lbw += [max_power_discharge]
+        battery_a_charge_power_pos_k = casadi.SX.sym("power_pos_a_" + str(k))  # casadi symbol for control variable
+        w += [battery_a_charge_power_pos_k]
+        lbw += [0]
         ubw += [max_power_charge]
         w0 += [0]  # use 0 power as initial guess
-        battery_b_charge_power_k = casadi.SX.sym("power_b_" + str(k))  # casadi symbol for control variable
-        w += [battery_b_charge_power_k]
-        lbw += [max_power_discharge]
+        battery_a_charge_power_neg_k = casadi.SX.sym("power_neg_a_" + str(k))  # casadi symbol for control variable
+        w += [battery_a_charge_power_neg_k]
+        lbw += [0]
+        ubw += [-max_power_discharge]
+        w0 += [0]  # use 0 power as initial guess
+        battery_b_charge_power_pos_k = casadi.SX.sym("power_pos_b_" + str(k))  # casadi symbol for control variable
+        w += [battery_b_charge_power_pos_k]
+        lbw += [0]
         ubw += [max_power_charge]
+        w0 += [0]  # use 0 power as initial guess
+        battery_b_charge_power_neg_k = casadi.SX.sym("power_neg_b_" + str(k))  # casadi symbol for control variable
+        w += [battery_b_charge_power_neg_k]
+        lbw += [0]
+        ubw += [-max_power_discharge]
         w0 += [0]  # use 0 power as initial guess
         grid_power_k = casadi.SX.sym("grid_power_" + str(k))
         w += [grid_power_k]
@@ -82,19 +91,18 @@ def build_optimization_problem(residual_fixed_load, price, soc=0):
         ubw += [math.inf]
         w0 += [residual_fixed_load[k]]
         # compute intermediate result of soc update formula
-        d_soc_a = DELTA_TIME_HOURS * battery_a_charge_power_k / energy_capacity
-        soc_a_end = soc_a_k + d_soc_a
+        d_soc_a_pos = DELTA_TIME_HOURS * battery_a_charge_power_pos_k / energy_capacity
+        d_soc_a_neg = DELTA_TIME_HOURS * battery_a_charge_power_neg_k / energy_capacity
+
+        soc_a_end = soc_a_k + d_soc_a_pos - d_soc_a_neg
         soc_a_k = casadi.SX.sym(f"soc_a_end{k + 1}")
         w += [soc_a_k]
         lbw += [min_soc]
         ubw += [max_soc]
         w0 += [0.5]
         d_soh_a_calendrical = 0.2/max_life_time_hours
-        d_soc_a_charging = np.log(1 + np.exp(d_soc_a*large_number))/large_number #max(0,d_soc)
-        d_soc_a_discharging = np.log(1 + np.exp(-d_soc_a*large_number))/large_number # max(0,-d_soc)
-        d_soh_a_cyclical_charging = 0.2 * (d_soc_a_charging/2)/max_cycles
-        d_soh_a_cyclical_discharging = 0.2 * (d_soc_a_discharging/2)/max_cycles
-        d_soh_a = d_soh_a_calendrical + d_soh_a_cyclical_charging + d_soh_a_cyclical_discharging
+        d_soh_a_cyclical = 0.2 * ((d_soc_a_pos +d_soc_a_neg)/2)/max_cycles
+        d_soh_a = d_soh_a_calendrical + d_soh_a_cyclical
         soh_a_end = soh_a_k - d_soh_a
         soh_a_k = casadi.SX.sym(f"soh_a_end{k+1}")
         w += [soh_a_k]
@@ -102,19 +110,17 @@ def build_optimization_problem(residual_fixed_load, price, soc=0):
         ubw += [max_soh]
         w0 += [1.0]
 
-        d_soc_b = DELTA_TIME_HOURS * battery_b_charge_power_k / energy_capacity
-        soc_b_end = soc_b_k + d_soc_b
+        d_soc_b_pos = DELTA_TIME_HOURS * battery_b_charge_power_pos_k / energy_capacity
+        d_soc_b_neg = DELTA_TIME_HOURS * battery_b_charge_power_neg_k / energy_capacity
+        soc_b_end = soc_b_k + d_soc_b_pos - d_soc_b_neg
         soc_b_k = casadi.SX.sym(f"soc_b_end{k + 1}")
         w += [soc_b_k]
         lbw += [min_soc]
         ubw += [max_soc]
         w0 += [0.5]
         d_soh_b_calendrical = 0.2 / max_life_time_hours
-        d_soc_b_charging = np.log(1 + np.exp(d_soc_b*large_number))/large_number
-        d_soc_b_discharging = np.log(1 + np.exp(-d_soc_b*large_number))/large_number # ln(1+e^x) ~ max(0,x)
-        d_soh_b_cyclical_charging = 0.2 * (d_soc_b_charging / 2) / max_cycles
-        d_soh_b_cyclical_discharging = 0.2 * (d_soc_b_discharging / 2) / max_cycles
-        d_soh_b = d_soh_b_calendrical + d_soh_b_cyclical_charging + d_soh_b_cyclical_discharging
+        d_soh_b_cyclical = 0.2 * ((d_soc_b_pos + d_soc_b_neg) / 2) / max_cycles
+        d_soh_b = d_soh_b_calendrical + d_soh_b_cyclical
         soh_b_end = soh_b_k - d_soh_b
         soh_b_k = casadi.SX.sym(f"soh_b_end{k + 1}")
         w += [soh_b_k]
@@ -129,7 +135,9 @@ def build_optimization_problem(residual_fixed_load, price, soc=0):
               soh_a_end - soh_a_k,
               soc_b_end - soc_b_k,
               soh_b_end - soh_b_k,
-              grid_power_k - (residual_fixed_load[k] + battery_a_charge_power_k + battery_b_charge_power_k)]
+              grid_power_k - (residual_fixed_load[k] + \
+                              battery_a_charge_power_pos_k - battery_a_charge_power_neg_k + \
+                              battery_b_charge_power_pos_k - battery_b_charge_power_neg_k)]
         lbg += [0, 0, 0, 0, 0]
         ubg += [0, 0, 0, 0, 0]
 
@@ -152,14 +160,19 @@ if __name__ == "__main__":
 
     traj = build_optimization_problem(residual_fixed_load, price, soc=0.5)
     t = [time[i] * DELTA_TIME_HOURS for i in time]
-    soc_a_traj = traj[0::7]
-    soh_a_traj = traj[1::7]
-    soc_b_traj = traj[2::7]
-    soh_b_traj = traj[3::7]
-    battery_a_charge_power_traj = traj[4::7]
-    battery_b_charge_power_traj = traj[5::7]
+    soc_a_traj = traj[0::9]
+    soh_a_traj = traj[1::9]
+    soc_b_traj = traj[2::9]
+    soh_b_traj = traj[3::9]
+    battery_a_charge_power_pos_traj = traj[4::9]
+    battery_a_charge_power_neg_traj = traj[5::9]
+    battery_a_charge_power_traj = battery_a_charge_power_pos_traj - battery_a_charge_power_neg_traj
+    battery_b_charge_power_pos_traj = traj[6::9]
+    battery_b_charge_power_neg_traj = traj[7::9]
+    battery_b_charge_power_traj = battery_b_charge_power_pos_traj - battery_b_charge_power_neg_traj
+
     print(np.mean(np.abs(battery_a_charge_power_traj)),np.mean(np.abs(battery_b_charge_power_traj)))
-    grid_power_traj = traj[6::7]
+    grid_power_traj = traj[8::9]
     print(traj.shape)
     baseline_cost = sum(residual_fixed_load[residual_fixed_load > 0] * price) + (1/15*(replacement_price_battA+replacement_price_battB))
     cost = sum(grid_power_traj[grid_power_traj > 0]) * price \
