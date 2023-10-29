@@ -54,9 +54,9 @@ if __name__ == "__main__":
 
     load, price, generation = read_data()
 
-    load = load[0:8700]
-    price = price[0:8700]
-    generation = generation[0:8700]
+    load = load[4380:8700]
+    price = price[4380:8700]
+    generation = generation[4380:8700]
 
     residual_fixed_load = load - generation
     time = range(len(residual_fixed_load))
