@@ -30,7 +30,7 @@ def build_optimization_problem(residual_fixed_load, price, soc=0):
     min_soc = 0
     min_soh = 0.8
     max_soh = 1
-    max_life_time = 15 #years
+    max_life_time = 5 #years
     max_life_time_hours = max_life_time*HOURS_PER_YEAR
     max_cycles = 10000
     energy_capacity = 200  # kWh
@@ -54,34 +54,36 @@ def build_optimization_problem(residual_fixed_load, price, soc=0):
     lbw += [1.0]
     ubw += [1.0]
     w0 += [1.0]
-    # d_sohs_calendrical = []
-    # d_sohs_cyclical = []
     print(len(residual_fixed_load))
     for k in range(len(residual_fixed_load)):
-        battery_charge_power_k = casadi.SX.sym("power_" + str(k))  # casadi symbol for control variable
-        w += [battery_charge_power_k]
-        lbw += [max_power_discharge]
+        battery_charge_power_pos_k = casadi.SX.sym("power_pos_"+str(k))
+        w += [battery_charge_power_pos_k]
+        lbw += [0]
         ubw += [max_power_charge]
-        w0 += [0]  # use 0 power as initial guess
+        w0 += [0]
+        battery_charge_power_neg_k = casadi.SX.sym("power_neg_" + str(k))
+        w += [battery_charge_power_neg_k]
+        lbw += [0]
+        ubw += [-max_power_discharge]
+        w0 += [0]
         grid_power_k = casadi.SX.sym("grid_power_" + str(k))
         w += [grid_power_k]
         lbw += [-math.inf]
         ubw += [math.inf]
         w0 += [residual_fixed_load[k]]
+        battery_charge_power_k = battery_charge_power_pos_k - battery_charge_power_neg_k
         # compute intermediate result of soc update formula
-        d_soc = DELTA_TIME_HOURS * battery_charge_power_k / energy_capacity
-        soc_end = soc_k + d_soc
+        d_soc_pos = DELTA_TIME_HOURS * battery_charge_power_pos_k / energy_capacity
+        d_soc_neg = DELTA_TIME_HOURS * battery_charge_power_neg_k / energy_capacity
+        soc_end = soc_k + d_soc_pos - d_soc_neg
         soc_k = casadi.SX.sym(f"soc_end{k + 1}")
         w += [soc_k]
         lbw += [min_soc]
         ubw += [max_soc]
         w0 += [0.5]
         d_soh_calendrical = 0.2/max_life_time_hours
-        d_soc_charging = np.log(1 + np.exp(d_soc))
-        d_soc_discharging = np.log(1 + np.exp(-d_soc))
-        d_soh_cyclical_charging = 0.2 * (d_soc_charging/2)/max_cycles
-        d_soh_cyclical_discharging = 0.2 * (d_soc_discharging/2)/max_cycles
-        d_soh = d_soh_calendrical + d_soh_cyclical_charging + d_soh_cyclical_discharging
+        d_soh_cyclical = 0.2 * ((d_soc_pos+d_soc_neg)/2)/max_cycles
+        d_soh = d_soh_calendrical + d_soh_cyclical
         soh_end = soh_k - d_soh
         soh_k = casadi.SX.sym(f"soh_end{k+1}")
         w+= [soh_k]
@@ -112,10 +114,13 @@ if __name__ == "__main__":
 
     traj = build_optimization_problem(residual_fixed_load, price, soc=0)
     t = [time[i] * DELTA_TIME_HOURS for i in time]
-    soc_traj = traj[0::4]
-    soh_traj = traj[1::4]
-    battery_charge_power_traj = traj[2::4]
-    grid_power_traj = traj[3::4]
+    soc_traj = traj[0::5]
+    soh_traj = traj[1::5]
+    battery_charge_power_pos_traj = traj[2::5]
+    battery_charge_power_neg_traj = traj[3::5]
+    print("Battery powers should be exclusive",sum([abs(battery_charge_power_neg_traj[i]*battery_charge_power_pos_traj[i]) for i in range(len(battery_charge_power_pos_traj))]))
+    battery_charge_power_traj = battery_charge_power_pos_traj - battery_charge_power_neg_traj
+    grid_power_traj = traj[4::5]
     print(traj.shape)
     baseline_cost = sum(residual_fixed_load[residual_fixed_load > 0] * price) + (1/15*replacement_price)
     augmented_load = np.array([(battery_charge_power_traj[i]) for i in time]) + residual_fixed_load
@@ -128,7 +133,7 @@ if __name__ == "__main__":
     fig1 = plt.figure()
     ax = plt.subplot()
     Line1 = ax.plot(time, [(residual_fixed_load[i]) for i in time], label='Residual Load')
-    Line2 = ax.plot(time, [price] * 8700, '--', label='Price')
+    # Line2 = ax.plot(time, [price] * 8700, '--', label='Price')
     Line3 = ax.plot(time, [(battery_charge_power_traj[i]) for i in time], label='Battery Charge Power')
     Line4 = ax.plot(time, [(grid_power_traj[i]) for i in time], label='Grid Power')
     Line5 = ax.plot(time, [(soc_traj[i]) * 100 for i in time], label="Battery SOC")
