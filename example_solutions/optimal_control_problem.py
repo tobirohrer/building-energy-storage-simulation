@@ -6,7 +6,6 @@ from helper import read_data, TEST_INDEX_END, TEST_INDEX_START, BATTERY_CAPACITY
 
 
 def build_optimization_problem(residual_fixed_load, price, soc, battery_power, battery_capacity, delta_time_hours=1):
-    # model parameter initilization
     time = range(len(residual_fixed_load))
     soc_time = range(len(residual_fixed_load) + 1)
     max_power_charge = battery_power
@@ -21,6 +20,7 @@ def build_optimization_problem(residual_fixed_load, price, soc, battery_power, b
     m.soc = pyo.Var(soc_time, bounds=(min_soc, max_soc))
 
     def obj_expression(m):
+        # pyo.log to make the objective expression smooth and therefore solvable
         return sum([price[i] * pyo.log(1 + pyo.exp((m.power[i] + residual_fixed_load[i]))) for i in time])
 
     m.OBJ = pyo.Objective(rule=obj_expression, sense=pyo.minimize)
@@ -31,6 +31,7 @@ def build_optimization_problem(residual_fixed_load, price, soc, battery_power, b
     m.soc_start = pyo.Constraint(rule=soc_start_rule)
 
     def soc_constraint_rule(m, i):
+        # Define the system dynamics as constraint
         return m.soc[i + 1] == float(100) * delta_time_hours * (m.power[i]) / energy_capacity + m.soc[i]
 
     m.soc_constraints = pyo.Constraint(time, rule=soc_constraint_rule)

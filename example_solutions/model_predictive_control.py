@@ -42,18 +42,23 @@ while not done:
     residual_load_forecast = load_forecast - generation_forecast
     soc = obs[0]
 
-    instance = build_optimization_problem(residual_fixed_load=residual_load_forecast,
-                                          price=price_forecast,
-                                          soc=soc / BATTERY_CAPACITY * 100,  # Convert SOC due to different SOC definitions
-                                          battery_capacity=BATTERY_CAPACITY,
-                                          battery_power=BATTERY_POWER)
+    optimization_problem = build_optimization_problem(residual_fixed_load=residual_load_forecast,
+                                                      price=price_forecast,
+                                                      soc=soc / BATTERY_CAPACITY * 100,  # Convert SOC due to different SOC definitions
+                                                      battery_capacity=BATTERY_CAPACITY,
+                                                      battery_power=BATTERY_POWER)
+    solver.solve(optimization_problem, tee=True)
+    # Only apply the first action of the optimal solution in each iteration. This is a key concept of MPC.
+    action = pyo.value(optimization_problem.power[0])
+    # Normalize action, as the environment expects normalized actions.
+    normalized_action = normalize_to_minus_one_to_one(action, -1 * BATTERY_POWER, BATTERY_POWER)
+    # Apply action to the environment and get new observation aka. state which is used to build the optimal control
+    # problem of the next time step.
+    obs, _, done, _, _ = env.step(normalized_action)
 
-    solver.solve(instance, tee=True)
-    action = pyo.value(instance.power[0])
-    actions = np.append(actions, action)
-    obs, reward, done, _, info = env.step(normalize_to_minus_one_to_one(action, -1 * BATTERY_POWER, BATTERY_POWER))
     residual_loads = np.append(residual_loads, residual_load_forecast[0])
     prices = np.append(prices, price_forecast[0])
+    actions = np.append(actions, action)
     t += 1
 
 baseline_cost = sum(residual_loads[residual_loads > 0] * prices[residual_loads > 0])
