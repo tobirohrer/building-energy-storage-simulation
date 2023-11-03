@@ -62,7 +62,7 @@ cost = sum(augmented_load[augmented_load > 0] * prices[augmented_load > 0])
 
 print('baseline cost: ' + str(baseline_cost))
 print('cost: ' + str(cost))
-print('savings in %: ' + str(cost/baseline_cost))
+print('savings in %: ' + str(1 - cost/baseline_cost))
 
 time = range(len(actions))
 

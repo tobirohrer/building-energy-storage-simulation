@@ -4,10 +4,8 @@ import matplotlib.pyplot as plt
 
 from helper import read_data, TEST_INDEX_END, TEST_INDEX_START, BATTERY_CAPACITY, BATTERY_POWER
 
-DELTA_TIME_HOURS = 1
 
-
-def build_optimization_problem(residual_fixed_load, price, soc, battery_power, battery_capacity):
+def build_optimization_problem(residual_fixed_load, price, soc, battery_power, battery_capacity, delta_time_hours=1):
     # model parameter initilization
     time = range(len(residual_fixed_load))
     soc_time = range(len(residual_fixed_load) + 1)
@@ -33,7 +31,7 @@ def build_optimization_problem(residual_fixed_load, price, soc, battery_power, b
     m.soc_start = pyo.Constraint(rule=soc_start_rule)
 
     def soc_constraint_rule(m, i):
-        return m.soc[i + 1] == float(100) * DELTA_TIME_HOURS * (m.power[i]) / energy_capacity + m.soc[i]
+        return m.soc[i + 1] == float(100) * delta_time_hours * (m.power[i]) / energy_capacity + m.soc[i]
 
     m.soc_constraints = pyo.Constraint(time, rule=soc_constraint_rule)
 
@@ -58,7 +56,7 @@ if __name__ == "__main__":
                                    battery_power=BATTERY_POWER,
                                    battery_capacity=BATTERY_CAPACITY)
     solver.solve(m, tee=True)
-    t = [time[i] * DELTA_TIME_HOURS for i in time]
+    t = [time[i] for i in time]
 
     baseline_cost = sum(residual_fixed_load_eval[residual_fixed_load_eval > 0] * price_eval[residual_fixed_load_eval > 0])
     augmented_load = residual_fixed_load_eval + np.array([(pyo.value(m.power[i])) for i in time])
@@ -66,7 +64,7 @@ if __name__ == "__main__":
 
     print('baseline cost: ' + str(baseline_cost))
     print('cost: ' + str(cost))
-    print('savings in %: ' + str(cost/baseline_cost))
+    print('savings in %: ' + str(1 - cost/baseline_cost))
 
     fig1 = plt.figure()
     ax = plt.subplot()
