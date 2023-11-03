@@ -3,6 +3,9 @@ import numpy as np
 
 
 class ObservationWrapper(gymnasium.Wrapper):
+    """
+    Combines generation and load into one variable to reduce dimensionality of the observation space.
+    """
     def __init__(self, env, forecast_length):
         super().__init__(env)
 

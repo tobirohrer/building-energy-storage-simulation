@@ -6,6 +6,9 @@ from typing import Tuple
 TEST_INDEX_START = 4380
 TEST_INDEX_END = 8500
 
+BATTERY_CAPACITY = 400
+BATTERY_POWER = 100
+
 
 def read_data() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     load = pd.read_csv('../building_energy_storage_simulation/data/preprocessed/electricity_load_profile.csv')[
