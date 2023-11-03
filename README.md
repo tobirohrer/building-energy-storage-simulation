@@ -97,6 +97,22 @@ The length of the forecast can be defined by setting the parameter `num_forecast
 
 The episode ends if the `max_timesteps` of the `Environment()` are reached.
 
+## Example Solutions
+
+The folder [example_solutions](example_solutions) contains three different example solutions to solve the problem 
+described.
+
+1. By applying deep reinforcement learning using the framework [stable-baselines3](https://github.com/DLR-RM/stable-baselines3).
+2. By formulating the problem as optimal control problem (OCP) using [pyomo](http://www.pyomo.org/). In this case, it 
+   is assumed that the forecast for the price, load and generation data for the whole period is available. 
+3. By model predictive control, which solves the optimal control problem formulation from 2. in each time step in a closed loop manner.
+   In contrast to 2. only a forecast of a fixed length is given in each iteration. 
+
+Note that the execution of the example solutions requires additional dependencies which are not specified inside `setup.py`. 
+Therefore, make sure to install the required python packages defined in `requirements.txt`. Additionally, an installation 
+of the `ipopt` solver is required in order to solve the optimal control problem 
+(by using conda, simply run `conda install -c conda-forge ipopt`). 
+
 ## Code Documentation
 
 The documentation is available at [https://building-energy-storage-simulation.readthedocs.io/](https://building-energy-storage-simulation.readthedocs.io/en/master/)
