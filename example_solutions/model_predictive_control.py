@@ -1,10 +1,9 @@
 import pyomo.environ as pyo
 import numpy as np
-import matplotlib.pyplot as plt
 
 from building_energy_storage_simulation import BuildingSimulation, Environment
 from optimal_control_problem import build_optimization_problem
-from helper import read_data, TEST_INDEX_END, TEST_INDEX_START, BATTERY_POWER, BATTERY_CAPACITY
+from helper import read_data, TEST_INDEX_END, TEST_INDEX_START, BATTERY_POWER, BATTERY_CAPACITY, plot_control_trajectory
 
 FORECAST_LENGTH = 24
 
@@ -69,16 +68,8 @@ print('baseline cost: ' + str(baseline_cost))
 print('cost: ' + str(cost))
 print('savings in %: ' + str(1 - cost/baseline_cost))
 
-time = range(len(actions))
+plot_control_trajectory(residual_load=residual_loads,
+                        augmented_load=residual_loads + actions,
+                        price=prices,
+                        battery_power=actions)
 
-fig1 = plt.figure()
-ax = plt.subplot()
-ax.plot(residual_loads, label='Residual Load')
-ax.plot(residual_loads + actions, label='Augmented Load')
-ax.plot(actions, label='Battery Power Applied')
-ax.plot(prices, '--', label='Price')
-plt.ylabel('Load and Battery Power Applied (kW) & Price (Cent per kWh)')
-plt.xlabel('Time Step')
-ax.legend()
-ax.grid()
-plt.show()
