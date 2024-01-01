@@ -1,8 +1,7 @@
 import pyomo.environ as pyo
 import numpy as np
-import matplotlib.pyplot as plt
 
-from helper import read_data, TEST_INDEX_END, TEST_INDEX_START, BATTERY_CAPACITY, BATTERY_POWER
+from helper import read_data, TEST_INDEX_END, TEST_INDEX_START, BATTERY_CAPACITY, BATTERY_POWER, plot_control_trajectory
 
 
 def build_optimization_problem(residual_fixed_load, price, soc, battery_power, battery_capacity, delta_time_hours=1):
@@ -67,14 +66,8 @@ if __name__ == "__main__":
     print('cost: ' + str(cost))
     print('savings in %: ' + str(1 - cost/baseline_cost))
 
-    fig1 = plt.figure()
-    ax = plt.subplot()
-    ax.plot([(residual_fixed_load_eval[i]) for i in time], label='Residual Load')
-    ax.plot(augmented_load, label='Augmented Load')
-    ax.plot(price_eval, '--', label='Price')
-    ax.plot([(pyo.value(m.power[i])) for i in time], label='Battery Power')
-    plt.ylabel('Load and Battery Power Applied (kW) & Price (Cent per kWh)')
-    plt.xlabel('Time Step')
-    ax.legend()
-    ax.grid()
-    plt.show()
+    plot_control_trajectory(residual_load=[(residual_fixed_load_eval[i]) for i in time],
+                            augmented_load=augmented_load,
+                            price=price_eval,
+                            battery_power=[(pyo.value(m.power[i])) for i in time]
+                            )
