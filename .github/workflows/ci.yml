@@ -7,15 +7,17 @@ on:
     branches: [ "master" ]
 
 jobs:
-  test:
-
+  checkup:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
 
     - name: install dependencies
-      run: pip install .[tests]
+      run: pip install .[dev]
 
     - name: Run Tests with pytest
       run: pytest ./tests
+
+    - name: Type checking with mypy
+      run: mypy building_energy_storage_simulation
