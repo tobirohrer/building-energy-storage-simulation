@@ -1,9 +1,9 @@
-from typing import Tuple, Optional, Union, List, Iterable, Any
-from collections.abc import MutableSequence
+from typing import Any, Iterable, List, Optional, Tuple, Union
 
 import gymnasium as gym
 import numpy as np
-from gymnasium.core import ActType, ObsType, RenderFrame
+from gymnasium.core import RenderFrame
+
 from building_energy_storage_simulation.building_simulation import BuildingSimulation
 
 

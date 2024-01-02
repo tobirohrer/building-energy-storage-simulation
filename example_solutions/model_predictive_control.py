@@ -1,9 +1,9 @@
-import pyomo.environ as pyo
 import numpy as np
+import pyomo.environ as pyo
+from helper import BATTERY_CAPACITY, BATTERY_POWER, TEST_INDEX_END, TEST_INDEX_START, plot_control_trajectory, read_data
+from optimal_control_problem import build_optimization_problem
 
 from building_energy_storage_simulation import BuildingSimulation, Environment
-from optimal_control_problem import build_optimization_problem
-from helper import read_data, TEST_INDEX_END, TEST_INDEX_START, BATTERY_POWER, BATTERY_CAPACITY, plot_control_trajectory
 
 FORECAST_LENGTH = 24
 
@@ -43,7 +43,8 @@ while not done:
 
     optimization_problem = build_optimization_problem(residual_fixed_load=residual_load_forecast,
                                                       price=price_forecast,
-                                                      soc=soc / BATTERY_CAPACITY * 100,  # Convert SOC due to different SOC definitions
+                                                      # Convert SOC due to different SOC definitions
+                                                      soc=soc / BATTERY_CAPACITY * 100,
                                                       battery_capacity=BATTERY_CAPACITY,
                                                       battery_power=BATTERY_POWER)
     solver.solve(optimization_problem, tee=True)

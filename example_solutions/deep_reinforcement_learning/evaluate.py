@@ -5,9 +5,15 @@ from stable_baselines3.common.results_plotter import plot_results
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 from building_energy_storage_simulation import BuildingSimulation, Environment
-from example_solutions.deep_reinforcement_learning.train import RESULT_PATH, NUM_FORECAST_STEPS
-from example_solutions.helper import read_data, TEST_INDEX_START, TEST_INDEX_END, BATTERY_POWER, BATTERY_CAPACITY, \
-    plot_control_trajectory
+from example_solutions.deep_reinforcement_learning.train import NUM_FORECAST_STEPS, RESULT_PATH
+from example_solutions.helper import (
+    BATTERY_CAPACITY,
+    BATTERY_POWER,
+    TEST_INDEX_END,
+    TEST_INDEX_START,
+    plot_control_trajectory,
+    read_data,
+)
 from example_solutions.observation_wrapper import ObservationWrapper
 
 
@@ -17,7 +23,7 @@ def evaluate(env, agent=None):
     done = False
     obs = env.reset()
     while not done:
-        if agent is None:
+        if agent is None:  # noqa
             action = [[0]]
         else:
             action = [agent.predict(obs, deterministic=True)[0][0]]
@@ -44,7 +50,7 @@ if __name__ == "__main__":
     # Plot evolution of reward during training
     try:
         plot_results(RESULT_PATH, x_axis='timesteps', task_name='title', num_timesteps=None)
-    except:
+    except:  # noqa
         print('Training Reward Plot could not be created')
 
     load, price, generation = read_data()

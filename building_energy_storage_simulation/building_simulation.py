@@ -1,4 +1,4 @@
-from typing import Tuple, Iterable, Union
+from typing import Iterable, Tuple, Union
 
 import numpy as np
 
@@ -26,7 +26,8 @@ class BuildingSimulation:
     def __init__(self,
                  electricity_load_profile: Iterable = load_profile('electricity_load_profile.csv', 'Load [kWh]'),
                  solar_generation_profile: Iterable = load_profile('solar_generation_profile.csv', 'Generation [kWh]'),
-                 electricity_price: Union[Iterable, float] = load_profile('electricity_price_profile.csv', 'Day Ahead Auction'),
+                 electricity_price: Union[Iterable, float] = load_profile('electricity_price_profile.csv',
+                                                                          'Day Ahead Auction'),
                  battery_capacity: float = 100,
                  max_battery_charge_per_timestep: float = 20
                  ):

@@ -1,8 +1,8 @@
-from building_energy_storage_simulation.building_simulation import BuildingSimulation
+import numpy as np
+import pytest
 
 from building_energy_storage_simulation import Environment
-import pytest
-import numpy as np
+from building_energy_storage_simulation.building_simulation import BuildingSimulation
 
 
 @pytest.fixture(scope='module')
@@ -37,7 +37,7 @@ def test_terminated_at_timelimit_reached(data_profile_length, num_forecasting_st
                       max_timesteps=data_profile_length - num_forecasting_steps)
     env.reset()
     print(range(data_profile_length - num_forecasting_steps))
-    for i in range(data_profile_length - num_forecasting_steps):
+    for _ in range(data_profile_length - num_forecasting_steps):
         obs, reward, terminated, trunc, info = env.step(0)
     assert terminated is True
 

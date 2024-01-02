@@ -1,0 +1,12 @@
+# Same as Black.
+line-length = 127
+# Assume Python 3.8
+target-version = "py38"
+# See https://beta.ruff.rs/docs/rules/
+select = ["E", "F", "B", "UP", "C90", "RUF", "I", "N", "B", "SIM"]
+# B028: Ignore explicit stacklevel`
+# RUF013: Too many false positives (implicit optional)
+ignore = ["B028", "RUF013"]
+
+[extend-per-file-ignores]
+"__init__.py" = ["F401", "F403"]

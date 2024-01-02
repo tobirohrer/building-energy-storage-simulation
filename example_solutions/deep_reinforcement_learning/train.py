@@ -5,7 +5,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 from building_energy_storage_simulation import BuildingSimulation, Environment
-from example_solutions.helper import read_data, TEST_INDEX_START, BATTERY_CAPACITY, BATTERY_POWER
+from example_solutions.helper import BATTERY_CAPACITY, BATTERY_POWER, TEST_INDEX_START, read_data
 from example_solutions.observation_wrapper import ObservationWrapper
 
 NUM_FORECAST_STEPS = 8
@@ -41,6 +41,7 @@ if __name__ == "__main__":
     # Train :-)
     model = SAC("MlpPolicy", env, verbose=1, gamma=0.95)
     model.learn(total_timesteps=200_000)
-    # Store the trained Model and environment stats (which are needed as we are standardizing the observations and reward using VecNormalize())
+    # Store the trained Model and environment stats (which are needed as we are standardizing the observations and
+    # reward using VecNormalize())
     model.save(RESULT_PATH + 'model')
     env.save(RESULT_PATH + 'env.pkl')
