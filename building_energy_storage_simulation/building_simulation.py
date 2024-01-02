@@ -46,9 +46,8 @@ class BuildingSimulation:
 
         self.step_count = 0
         self.start_index = 0
-        pass
 
-    def reset(self):
+    def reset(self) -> None:
         """
 
         1. Resetting the state of the building by calling `reset()` method from the battery class.
@@ -59,7 +58,6 @@ class BuildingSimulation:
 
         self.battery.reset()
         self.step_count = 0
-        pass
 
     def simulate_one_step(self, action: float) -> Tuple[float, float]:
         """
@@ -97,7 +95,7 @@ class BuildingSimulation:
         self.step_count += 1
         return electricity_consumption_this_timestep, electricity_price_this_timestep
 
-    def _check_data_profiles_same_length(self):
+    def _check_data_profiles_same_length(self) -> None:
         if len(self.solar_generation_profile) == len(self.electricity_load_profile) == len(self.electricity_price):
             pass
         else:

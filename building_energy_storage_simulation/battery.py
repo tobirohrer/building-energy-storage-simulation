@@ -20,9 +20,8 @@ class Battery:
         self.capacity = capacity
         self.initial_state_of_charge = initial_state_of_charge
         self.state_of_charge = initial_state_of_charge
-        pass
 
-    def use(self, amount: float):
+    def use(self, amount: float) -> float:
         """
         Using means charging or discharging the battery.
 
@@ -52,7 +51,7 @@ class Battery:
             self.state_of_charge += amount
         return electricity_used
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Resetting the `state_of_charge` of the battery to the `initial_state_of_charge`.
         """

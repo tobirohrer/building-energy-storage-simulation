@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Union, List
+from typing import Tuple, Optional, Union, List, Iterable, Any
 from collections.abc import MutableSequence
 
 import gymnasium as gym
@@ -50,7 +50,6 @@ class Environment(gym.Env):
                                                 low=-np.inf,
                                                 high=np.inf,
                                                 dtype=np.float32)
-        pass
 
     def render(self) -> Optional[Union[RenderFrame, List[RenderFrame]]]:
         """
@@ -59,7 +58,7 @@ class Environment(gym.Env):
 
         pass
 
-    def reset(self, seed=None, options=None) -> Tuple[ObsType, dict]:
+    def reset(self, seed: Union[int, None] = None, options: Any = None) -> Tuple[np.ndarray, dict]:
         """
         Resetting the state of the simulation by calling `reset()` method from the simulation class.
 
@@ -77,7 +76,7 @@ class Environment(gym.Env):
             self.building_simulation.start_index = int(np.random.uniform(0, latest_possible_start_time_step))
         return self.get_observation(), {}
 
-    def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
+    def step(self, action: Union[float, Iterable[float]]) -> Tuple[np.ndarray, float, bool, bool, dict]:
         """
         Perform one step, which is done by:
 
@@ -89,7 +88,7 @@ class Environment(gym.Env):
             action represents the fraction of `max_battery_charge_per_timestep` which should be used to charge or
             discharge the battery. 1 represents the maximum possible amount of energy which can be used to charge the
             battery per time step.
-        :type action: float
+        :type action: float or [float]
         :returns:
             Tuple of:
                 1. observation
@@ -103,19 +102,19 @@ class Environment(gym.Env):
         """
 
         if hasattr(action, "__len__"):
-            action = action[0]
-        electricity_consumption, electricity_price = self.building_simulation.simulate_one_step(action)
+            action = action[0]  # type: ignore
+        electricity_consumption, electricity_price = self.building_simulation.simulate_one_step(action)  # type: ignore
         reward = Environment.calc_reward(electricity_consumption, electricity_price)
         observation = self.get_observation()
         return observation, reward, self._get_terminated(), False, {'electricity_consumption': electricity_consumption,
                                                                     'electricity_price': electricity_price}
 
-    def _get_terminated(self):
+    def _get_terminated(self) -> bool:
         if self.building_simulation.step_count >= self.max_timesteps:
             return True
         return False
 
-    def get_observation(self):
+    def get_observation(self) -> np.ndarray:
         current_index = self.building_simulation.start_index + self.building_simulation.step_count
         sim = self.building_simulation
         electric_load_forecast = sim.electricity_load_profile[current_index: current_index + self.num_forecasting_steps]
@@ -127,23 +126,23 @@ class Environment(gym.Env):
             solar_gen_forecast = self._randomize_forecast(solar_gen_forecast)
             energy_price_forecast = self._randomize_forecast(energy_price_forecast)
 
-        return np.concatenate(([self.building_simulation.battery.state_of_charge],
+        return np.concatenate(([self.building_simulation.battery.state_of_charge],  # type: ignore
                                electric_load_forecast,
                                solar_gen_forecast,
                                energy_price_forecast),
                               axis=0)
 
     @staticmethod
-    def _randomize_forecast(forecast: MutableSequence,
+    def _randomize_forecast(forecast: np.ndarray,
                             standard_deviation_start: float = 0.2,
-                            standard_deviation_end: float = 1.0) -> MutableSequence:
+                            standard_deviation_end: float = 1.0) -> np.ndarray:
         # gamma can be interpreted as the quantification of the increase of uncertainty per time step.
         gamma = standard_deviation_end - standard_deviation_start
         for i in range(len(forecast)):
             std = standard_deviation_end - gamma ** i
             forecast[i] = forecast[i] + np.random.normal(0, std)
-        return forecast
+        return np.array(forecast)
 
     @staticmethod
-    def calc_reward(electricity_consumption, electricity_price):
+    def calc_reward(electricity_consumption: float, electricity_price: float) -> float:
         return -1 * electricity_consumption * electricity_price

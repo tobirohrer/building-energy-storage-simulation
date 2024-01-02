@@ -23,7 +23,7 @@ or if you want to continue developing the package:
 
 ```
 git clone https://github.com/tobirohrer/building-energy-storage-simulation.git && cd building-energy-storage-simulation
-pip install -e .[docs,tests]
+pip install -e .[dev]
 ```
 
 ## Usage
