@@ -1,7 +1,5 @@
 # Building Energy Storage Simulation
 
-[![Documentation Status](https://readthedocs.org/projects/building-energy-storage-simulation/badge/?version=latest)](https://building-energy-storage-simulation.readthedocs.io/en/latest/)
-
 <img src="docs/imgs/overview.drawio.png" alt="isolated" width="600"/>
 
 The Building Energy Storage Simulation serves as OpenAI gym (now [gymnasium](https://github.com/Farama-Foundation/Gymnasium)) environment 
