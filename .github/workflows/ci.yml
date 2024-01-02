@@ -21,3 +21,6 @@ jobs:
 
     - name: Type checking with mypy
       run: mypy building_energy_storage_simulation
+
+    - name: Code style checking with ruff
+      run: ruff check .

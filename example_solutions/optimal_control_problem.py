@@ -1,7 +1,6 @@
-import pyomo.environ as pyo
 import numpy as np
-
-from helper import read_data, TEST_INDEX_END, TEST_INDEX_START, BATTERY_CAPACITY, BATTERY_POWER, plot_control_trajectory
+import pyomo.environ as pyo
+from helper import BATTERY_CAPACITY, BATTERY_POWER, TEST_INDEX_END, TEST_INDEX_START, plot_control_trajectory, read_data
 
 
 def build_optimization_problem(residual_fixed_load, price, soc, battery_power, battery_capacity, delta_time_hours=1):
@@ -20,7 +19,7 @@ def build_optimization_problem(residual_fixed_load, price, soc, battery_power, b
 
     def obj_expression(m):
         # pyo.log to make the objective expression smooth and therefore solvable
-        return sum([price[i] * pyo.log(1 + pyo.exp((m.power[i] + residual_fixed_load[i]))) for i in time])
+        return sum([price[i] * pyo.log(1 + pyo.exp(m.power[i] + residual_fixed_load[i])) for i in time])
 
     m.OBJ = pyo.Objective(rule=obj_expression, sense=pyo.minimize)
 

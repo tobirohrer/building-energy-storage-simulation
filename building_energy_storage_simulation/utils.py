@@ -1,5 +1,5 @@
-import pkg_resources
 import pandas as pd
+import pkg_resources
 
 
 def load_profile(filename: str, column_name: str) -> pd.Series:

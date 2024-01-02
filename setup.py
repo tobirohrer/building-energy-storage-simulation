@@ -1,10 +1,11 @@
 from distutils.core import setup
 from pathlib import Path
+
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setup(name='building_energy_storage_simulation',
-      version='0.9.2',
+      version='0.9.3',
       description='A simulation of a building to optimize energy storage utilization.',
       long_description=long_description,
       long_description_content_type='text/markdown',
@@ -31,7 +32,8 @@ setup(name='building_energy_storage_simulation',
               "pytest",
               "mypy",
               "pandas-stubs",
-              "types-setuptools"
+              "types-setuptools",
+              "ruff"
           ]
       }
       )
