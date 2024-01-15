@@ -2,12 +2,12 @@
 
 <img src="docs/imgs/overview.drawio.png" alt="isolated" width="600"/>
 
-The Building Energy Storage Simulation serves as OpenAI gym (now [gymnasium](https://github.com/Farama-Foundation/Gymnasium)) environment 
-for Reinforcement Learning. The environment represents a building with an energy storage (in form of a battery) and a 
-solar energy system. The building is connected to a power grid with time varying electricity prices. The task is to 
-control the energy storage so that the total cost of electricity are minimized.
+The Building Energy Storage Simulation serves as an OpenAI gym (now [gymnasium](https://github.com/Farama-Foundation/Gymnasium)) environment 
+for Reinforcement Learning. The environment represents a building with an energy storage (in the form of a battery) and a 
+solar energy system. The building is connected to a power grid with time-varying electricity prices. The task is to 
+control the energy storage so that the total cost of electricity is minimized.
 
-The inspiration of this project and the data profiles come from the [CityLearn](https://github.com/intelligent-environments-lab/CityLearn) environment. Anyhow, this project focuses on the ease of usage and the simplicity of its implementation. Therefore, this project serves as playground for those who want to get started with reinforcement learning for energy management system control.
+The inspiration for this project and the data profiles come from the [CityLearn](https://github.com/intelligent-environments-lab/CityLearn) environment. Anyhow, this project focuses on the ease of usage and the simplicity of its implementation. Therefore, this project serves as a playground for those who want to get started with reinforcement learning for energy management system control.
 
 ## Installation
 
@@ -47,17 +47,17 @@ The simulation contains a building with an energy load profile attached to it. T
 - and secondary by using the remaining required electricity "from the grid"
 
 When energy is taken from the grid, costs are incurred that can vary depending on the time (if a price profile is passed
-as `electricity_price` to `BuildingSimulation`). The simulated building contains a battery which be controlled by 
-**charging** and **discharging** energy. The goal is to find control strategies optimize the use of the energy storage
+as `electricity_price` to `BuildingSimulation`). The simulated building contains a battery that be controlled by 
+**charging** and **discharging** energy. The goal is to find control strategies to optimize the use of energy storage
 by e.g. charging whenever electricity prices are high or whenever there is a surplus of solar generation. It is important 
 to note that no energy can be fed into the grid. This means any surplus of solar energy which is not used to charge the
 battery is considered lost.
 
 ### Reward
 
-$$ r_t = -1 * electricity\_consumed_t * electricity\_price_t$$ 
+$$r_t = -1 * electricity\\_consumed_t * electricity\\_price_t $$ 
 
-Note, that the term `electricity_consumed` cannot be negative. This means, excess energy from the solar 
+Note, that the term `electricity_consumed` cannot be negative. This means excess energy from the solar 
 energy system which is not consumed by the electricity load or by charging the battery is considered lost 
 (`electricity_consumed` is 0 in this case). 
  
@@ -67,7 +67,7 @@ energy system which is not consumed by the electricity load or by charging the b
 |----------|----------|--------|
 | Charge   | -1       | 1      |
 
-The actions lie in the interval of [-1;1]. The action represents a fraction of the maximum energy which can be retrieved from the battery (or used to charge the battery) per time step.
+The actions lie in the interval of [-1;1]. The action represents a fraction of the maximum energy that can be retrieved from the battery (or used to charge the battery) per time step.
 
 - 1 means maximum charging the battery. The maximum charge per time step is defined by the parameter `max_battery_charge_per_timestep`.
 - -1 means maximum discharging the battery, meaning "gaining" electricity out of the battery
@@ -84,8 +84,8 @@ The actions lie in the interval of [-1;1]. The action represents a fraction of t
 
 
 The length of the observation depends on the length of the forecast ($n$) used. By default, the simulation uses a forecast length of 4. 
-This means 4 time steps of an electric load forecast, 4 time steps of a solar generation forecast and 4 time steps of the 
-electric price profile are included in the observation. 
+This means 4 time steps of an electric load forecast, 4 time steps of a solar generation forecast, and 4 time steps of the 
+electric price profiles are included in the observation. 
 In addition to that, the information about the current state of charge of the battery is contained in the observation.
 
 The length of the forecast can be defined by setting the parameter `num_forecasting_steps` of the `Environment()`.
@@ -101,14 +101,14 @@ The folder [example_solutions](example_solutions) contains three different examp
 described.
 
 1. By applying deep reinforcement learning using the framework [stable-baselines3](https://github.com/DLR-RM/stable-baselines3).
-2. By formulating the problem as optimal control problem (OCP) using [pyomo](http://www.pyomo.org/). In this case, it 
-   is assumed that the forecast for the price, load and generation data for the whole period is available. 
+2. By formulating the problem as an optimal control problem (OCP) using [pyomo](http://www.pyomo.org/). In this case, it 
+   is assumed that the forecast for the price, load, and generation data for the whole period is available. 
 3. By model predictive control, which solves the optimal control problem formulation from 2. in each time step in a closed loop manner.
    In contrast to 2. only a forecast of a fixed length is given in each iteration. 
 
 Note that the execution of the example solutions requires additional dependencies which are not specified inside `setup.py`. 
-Therefore, make sure to install the required python packages defined in `requirements.txt`. Additionally, an installation 
-of the `ipopt` solver is required in order to solve the optimal control problem 
+Therefore, make sure to install the required Python packages defined in `requirements.txt`. Additionally, an installation 
+of the `ipopt` solver is required to solve the optimal control problem 
 (by using conda, simply run `conda install -c conda-forge ipopt`). 
 
 ## Code Documentation
